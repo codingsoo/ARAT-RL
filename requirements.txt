@@ -1,0 +1,5 @@
+pyyaml
+prance
+openapi-spec-validator
+rstr
+requests==2.28.2
