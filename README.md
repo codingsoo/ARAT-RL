@@ -33,7 +33,7 @@ After installing all the required software, you can run the tools with this comm
 python run.py [tool's name]
 ```
 
-This command will run the tool and all the services for an hour. Possible tool names are `arat-rl`, `morest`, `evomaster-blackbox`, and `restler`. If you want to run an ablation study, you can set the tool names to: `no_prioritization`, `no_feedback`, and `no_sampling`.
+This command will run the tool and all the services in our benchmark for an hour. Possible tool names are `arat-rl`, `morest`, `evomaster-blackbox`, and `restler`. If you want to run an ablation study, you can set the tool names to: `no_prioritization`, `no_feedback`, and `no_sampling`.
 
 ## Collect the results
 
