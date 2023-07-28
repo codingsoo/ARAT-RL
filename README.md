@@ -37,10 +37,14 @@ This command will run the tool and all the services in our benchmark for an hour
 
 ## Collect the results
 
-To collect the results, you can use this command:
+To collect the results, use the following command:
 
 ```
 python parse_log.py
 ```
 
-It will collect the coverage and the number of responses for 2xx, 4xx, and 5xx and store the results in the `res.csv` file.
+This will gather the coverage and number of responses for status codes 2xx, 4xx, and 5xx. The results will be stored in the `res.csv` file. Additionally, any detected bugs will be recorded in the `errors.json` file.
+
+## Review the Results
+
+The `results` directory contains the results for each tool and each service. These results include the achieved code coverage, the number of obtained status codes, the number of bugs found, and detailed bug reports.

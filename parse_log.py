@@ -94,6 +94,7 @@ def count_unique_5xx_errors(log_data):
 
                 error_message = response_text.strip()
                 unique_stack_traces[error_message] += 1
+                full_stack_traces[error_message] = log_item['response']['text']
 
     return unique_stack_traces
 
@@ -101,6 +102,8 @@ if __name__ == '__main__':
     logs = ["features.txt", "languagetool.txt", "ncs.txt", "restcountries.txt", "scs.txt", "genome.txt", "person.txt", "user.txt", "market.txt", "project.txt"]
     csvs = ["_11000_1.csv","_11010_1.csv","_11020_1.csv","_11030_1.csv","_11040_1.csv","_11050_1.csv","_11060_1.csv","_11070_1.csv","_11080_1.csv","_11090_1.csv"]
     result = [""]
+    full_stack_traces = {}
+    errors = {}
 
     count_coverage("service/jdk8_1/cs/rest/original/features-service", "_11000_1")
     count_coverage("service/jdk8_1/cs/rest/original/languagetool/", "_11010_1")
@@ -114,10 +117,12 @@ if __name__ == '__main__':
     count_coverage("service/jdk11/project-tracking-system", "_11090_1")
     for log_file in logs:
         print(log_file)
+        errors[log_file] = []
         log_data = parse_log_file(log_file)
         unique_stack_traces = count_unique_5xx_errors(log_data)
         unique_5xx_count = 0
         for stack_trace, count in unique_stack_traces.items():
+            errors[log_file].append(full_stack_traces[stack_trace])
             unique_5xx_count += 1
         print(f'\nTotal unique number of 5xx errors: {unique_5xx_count}')
         result[0] = result[0] + str(unique_5xx_count) + '\n'
@@ -146,6 +151,9 @@ if __name__ == '__main__':
 
     with open("res.csv", "w") as f:
         f.write(result[0])
+
+    with open('errors.json', 'w') as f:
+        json.dump(errors, f)
 
 
 
