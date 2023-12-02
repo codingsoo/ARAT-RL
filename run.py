@@ -21,7 +21,10 @@ if __name__ == "__main__":
     time.sleep(300)
     time.sleep(int(time_limit) * 60 * 60)
 
-    subprocess.run("sh stop_all.sh", shell=True)
+    print("Stop running services...")
+    subprocess.run("sudo docker stop `sudo docker ps -a -q`", shell=True)
+    time.sleep(30)
+    subprocess.run("sudo docker rm `sudo docker ps -a -q`", shell=True)
     for i in range(10):
         subprocess.run("tmux kill-sess -t " + services[i], shell=True)
         subprocess.run("tmux kill-sess -t " + services[i] + "_cov", shell=True)
