@@ -1,4 +1,4 @@
-sudo docker run -d -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=users mysql
+docker run -d -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=users mysql
 # Role Based Access Control - User Management Microservice
 
 #### Author

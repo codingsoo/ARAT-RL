@@ -12,7 +12,7 @@
 ## MongoDB Atlas
 
 ```
-sudo docker run -d -p 27019:27017 --name mongodb mongo:latest
+docker run -d -p 27019:27017 --name mongodb mongo:latest
 ```
 
 - Get started with a Free Tier Cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).

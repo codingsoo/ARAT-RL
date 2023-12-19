@@ -12,6 +12,8 @@ sudo apt-get install -y openjdk-11-jdk
 # Install Python3
 sudo apt-get install -y python3-pip python3-virtualenv
 virtualenv venv
+. ./venv/bin/activate
+sudo update-alternatives /usr/bin/python python /usr/bin/python3 10
 
 # Install Docker
 sudo apt-get install -y docker.io
@@ -37,9 +39,9 @@ cd ../../jdk11/market && mvn clean install -DskipTests && mvn dependency:build-c
 cd ../project-tracking-system && mvn clean install -DskipTests && mvn dependency:build-classpath -Dmdep.outputFile=cp.txt
 cd ../../..
 
-sudo docker pull genomenexus/gn-mongo
-sudo docker pull mongo
-sudo docker pull mysql
+docker pull genomenexus/gn-mongo
+docker pull mongo
+docker pull mysql
 
 # Install EvoMaster 1.6.0
 wget https://github.com/EMResearch/EvoMaster/releases/download/v1.6.0/evomaster.jar.zip
@@ -59,3 +61,5 @@ cd ..
 
 wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.agent/0.8.7/org.jacoco.agent-0.8.7-runtime.jar
 wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.7/org.jacoco.cli-0.8.7-nodeps.jar
+
+pip install rstr

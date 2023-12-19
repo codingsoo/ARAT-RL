@@ -17,6 +17,7 @@ RestlerLogs/
 .DS_Store/
 restler/
 rest-gitlab/
+__pycache__/
 
 cp.txt
 *.log

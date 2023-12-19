@@ -3,16 +3,17 @@ import sys
 import time
 import subprocess
 
+time_limit = int(os.getenv('TIME_LIMIT')) * 60
 
 def whitebox(port):
-    timeout = time.time() + 60 * 60 * int(time_limit)
+    timeout = time.time() + int(os.getenv('TIME_LIMIT'))
     while time.time() < timeout:
         subprocess.run("rm -rf " + service, shell=True)
         subprocess.run("java -jar evomaster.jar --sutControllerPort " + str(port) + " --maxTime " + time_limit + "h --outputFolder " + service, shell=True)
 
 
 def blackbox(swagger, port):
-    timeout = time.time() + 60 * 60 * int(time_limit)
+    timeout = time.time() + (int(os.get)) # one minute
     while time.time() < timeout:
         if tool == "evomaster-blackbox":
             subprocess.run("rm -rf " + service, shell=True)
