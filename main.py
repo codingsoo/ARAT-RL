@@ -16,7 +16,9 @@ import datetime
 import functools
 from collections import defaultdict
 
-
+time_limit = os.getenv('TIME_LIMIT')
+assert time_limit is not None
+print(f"Time limit: {time_limit}")
 
 def generate_object(object_definition, operation):
     random_object = {}
@@ -643,7 +645,7 @@ def main():
     alpha, gamma, q_table = initialize_q_learning(operations, parameters_frequency)
 
     start_time = time.time()
-    time_limit = 3600
+    time_limit = int(time_limit) * 60
     iteration = 0
     max_iterations_without_improvement = 10
 

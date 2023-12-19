@@ -99,22 +99,24 @@ def count_unique_5xx_errors(log_data):
     return unique_stack_traces
 
 if __name__ == '__main__':
-    logs = ["features.txt", "languagetool.txt", "ncs.txt", "restcountries.txt", "scs.txt", "genome.txt", "person.txt", "user.txt", "market.txt", "project.txt"]
-    csvs = ["_11000_1.csv","_11010_1.csv","_11020_1.csv","_11030_1.csv","_11040_1.csv","_11050_1.csv","_11060_1.csv","_11070_1.csv","_11080_1.csv","_11090_1.csv"]
+    # logs = ["features.txt", "languagetool.txt", "ncs.txt", "restcountries.txt", "scs.txt", "genome.txt", "person.txt", "user.txt", "market.txt", "project.txt"]
+    logs = ["features.txt"]
+    # csvs = ["_11000_1.csv","_11010_1.csv","_11020_1.csv","_11030_1.csv","_11040_1.csv","_11050_1.csv","_11060_1.csv","_11070_1.csv","_11080_1.csv","_11090_1.csv"]
+    csvs = ["_11000_1.csv"]
     result = [""]
     full_stack_traces = {}
     errors = {}
 
     count_coverage("service/jdk8_1/cs/rest/original/features-service", "_11000_1")
-    count_coverage("service/jdk8_1/cs/rest/original/languagetool/", "_11010_1")
-    count_coverage("service/jdk8_1/cs/rest/artificial/ncs/", "_11020_1")
-    count_coverage("service/jdk8_1/cs/rest/original/restcountries/", "_11030_1")
-    count_coverage("service/jdk8_1/cs/rest/artificial/scs/", "_11040_1")
-    count_coverage("service/jdk8_2/genome-nexus/", "_11050_1")
-    count_coverage("service/jdk8_2/person-controller/", "_11060_1")
-    count_coverage("service/jdk8_2/user-management", "_11070_1")
-    count_coverage("service/jdk11/market", "_11080_1")
-    count_coverage("service/jdk11/project-tracking-system", "_11090_1")
+    # count_coverage("service/jdk8_1/cs/rest/original/languagetool/", "_11010_1")
+    # count_coverage("service/jdk8_1/cs/rest/artificial/ncs/", "_11020_1")
+    # count_coverage("service/jdk8_1/cs/rest/original/restcountries/", "_11030_1")
+    # count_coverage("service/jdk8_1/cs/rest/artificial/scs/", "_11040_1")
+    # count_coverage("service/jdk8_2/genome-nexus/", "_11050_1")
+    # count_coverage("service/jdk8_2/person-controller/", "_11060_1")
+    # count_coverage("service/jdk8_2/user-management", "_11070_1")
+    # count_coverage("service/jdk11/market", "_11080_1")
+    # count_coverage("service/jdk11/project-tracking-system", "_11090_1")
     for log_file in logs:
         print(log_file)
         errors[log_file] = []
@@ -128,7 +130,7 @@ if __name__ == '__main__':
         result[0] = result[0] + str(unique_5xx_count) + '\n'
 
 
-    for i in range(10):
+    for i in range(len(logs)):
         total_branch = 0
         covered_branch = 0
         total_line = 0

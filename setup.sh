@@ -10,10 +10,9 @@ sudo apt-get install -y maven
 sudo apt-get install -y openjdk-11-jdk
 
 # Install Python3
-sudo apt-get install -y python3-pip python3-virtualenv
-virtualenv venv
+python3 -m venv venv
 . ./venv/bin/activate
-sudo update-alternatives /usr/bin/python python /usr/bin/python3 10
+pip install -r requirements.txt
 
 # Install Docker
 sudo apt-get install -y docker.io
@@ -62,4 +61,4 @@ cd ..
 wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.agent/0.8.7/org.jacoco.agent-0.8.7-runtime.jar
 wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.7/org.jacoco.cli-0.8.7-nodeps.jar
 
-pip install rstr
+chmod u+x get_cov.sh

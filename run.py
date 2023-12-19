@@ -3,10 +3,13 @@ import time
 import subprocess
 import os
 
+time_limit = os.getenv('TIME_LIMIT')
+assert time_limit is not None
+print(f"Time limit: {time_limit}")
 
 if __name__ == "__main__":
     tool = sys.argv[1]
-    time_limit = int(os.getenv('TIME_LIMIT'))
+
 
     base_cov_port = 11000
     # services = ["features-service", "languagetool", "ncs", "restcountries", "scs", "genome-nexus", "person-controller", "user-management", "market", "project-tracking-system"]
@@ -22,7 +25,7 @@ if __name__ == "__main__":
         subprocess.run("tmux new -d -s " + session + " 'timeout " + time_limit + "h python3 run_tool.py " + tool + ' ' + services[i] + ' ' + str(cov_port) + "'", shell=True)
 
     time.sleep(300)
-    time.sleep(time_limit * 60)
+    time.sleep(int(time_limit) * 60)
 
     print("Stop running services...")
     subprocess.run("docker stop `docker ps -a -q`", shell=True)
