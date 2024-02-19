@@ -1,6 +1,6 @@
 # ARAT-RL
 
-ARAT-RL is a tool designed to find internal server errors in REST APIs using OpenAPI Specifications using reinforcement learning. 
+ARAT-RL is a tool designed to find internal server errors in REST APIs using reinforcement learning. 
 This work has been published at ASE 2023, "[Adaptive REST API Testing with Reinforcement Learning](https://ieeexplore.ieee.org/document/10298580)".
 
 [Bibtex Citation Here](https://github.com/codingsoo/arat-rl/blob/main/docs/ase2023.bib)
