@@ -16,13 +16,13 @@ pip3 install -r requirements.txt
 Run ARAT-RL:
 
 ```
-python3 arat-rl.py Server_URL Specification_Location Runtime_in_Minutes
+python3 arat-rl.py Specification_Location Server_URL Runtime_in_Minutes
 ```
 
 For example:
 
 ```
-python arat-rl.py http://localhost:30100/ spec/features.yaml 3600
+python arat-rl.py spec/features.yaml http://localhost:30100/ 3600
 ```
 
 After an hour, it will print a report with found internal server errors. The results will be stored in `http_500_error_report.txt`.
