@@ -389,7 +389,7 @@ import json
 
 def report_http_500_errors():
     # Prepare the report content
-    report_content = "Total number of Found 500 Errors: " + str(total_n[0]) + "\n"
+    report_content = "Total number of operations that we found 500 Errors: " + str(total_n[0]) + "\n"
     report_content += "This report all errors that has different set of parameters, so we recommend to further explore them.\n"
     report_content += "HTTP 500 Error Report:\n"
     json_report = json.dumps(http_500_details, indent=4)
@@ -423,12 +423,17 @@ def update_q_table(q_table, alpha, gamma, selected_operation, selected_parameter
         reward = -5
 
     if response.status_code == 500:
+        if operation_id not in http_500_operations:
+            http_500_operations.append(operation_id)
+            total_n[0] = total_n[0] + 1
         if operation_id not in http_500_details:
             http_500_details[operation_id] = {}
         if selected_operation['path'] not in http_500_details[operation_id]:
             http_500_details[operation_id][selected_operation['path']] = {}
-        keys_list = list(selected_parameters.keys())
-        sorted_keys_list = sorted(keys_list.keys())
+        keys_list = [list(d.keys())[0] for d in selected_parameters]  # Extract the first key from each dictionary
+
+        # keys_list = list(selected_parameters.keys())
+        sorted_keys_list = sorted(keys_list)
         concatenated_keys = '_'.join(sorted_keys_list)
         if concatenated_keys not in http_500_details[operation_id][selected_operation['path']]:
             http_500_details[operation_id][selected_operation['path']][concatenated_keys] = []
@@ -438,8 +443,8 @@ def update_q_table(q_table, alpha, gamma, selected_operation, selected_parameter
                 "body_parameters": body_params,
                 "response": response
             }
-            http_500_details[operation_id].append(error_details)
-            total_n[0] = total_n[0] + 1
+            http_500_details[operation_id][selected_operation['path']][concatenated_keys].append(error_details)
+
 
     for param_value_dict in selected_parameters:
         for param_name, param_value in param_value_dict.items():
@@ -681,7 +686,7 @@ def main():
     alpha, gamma, q_table = initialize_q_learning(operations, parameters_frequency)
 
     start_time = time.time()
-    time_limit = sys.argv[3]
+    time_limit = int(sys.argv[3])
     iteration = 0
     max_iterations_without_improvement = 10
 
@@ -738,6 +743,7 @@ if __name__ == "__main__":
     cached_media_type = {}
     q_table_param_values = {}
     http_500_details = {}
+    http_500_operations = []
     producer = {}
     consumer = {}
     q_value = {}
