@@ -1,4 +1,4 @@
-# sudo apt-get update && sudo apt-get install -y git && git clone https://gitlab.com/sooding93/rest-rl
+sudo apt-get update
 
 # Install Common Utilities
 sudo apt-get install -y software-properties-common \
