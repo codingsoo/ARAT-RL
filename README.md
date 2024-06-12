@@ -66,7 +66,7 @@ To collect the results, use the following command:
 python parse_log.py
 ```
 
-This will gather the coverage and number of responses for status codes 2xx, 4xx, and 5xx. The results will be stored in the `res.csv` file. Additionally, any detected bugs will be recorded in the `errors.json` file.
+This will gather the coverage and number of responses for status codes 2xx, 4xx, and 5xx. The results will be stored in the `res.csv` file. Additionally, any detected bugs will be recorded in the `errors.json` file. + We noticed a bug when counting the unique number of 500 errors (we are not able to detect the ping pong between functions), so we highly recommend to manually validate the report to count the unique number of 500 errors.
 
 ### Review the Results
 
