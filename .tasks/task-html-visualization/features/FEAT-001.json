@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Refactor parse_log.py to add beautiful HTML report generation alongside existing CSV/JSON output. The HTML report should visualize all the data currently written to res.csv and errors.json in a modern, interactive dashboard using only inline CSS/JS (no external dependencies beyond standard Python). The HTML should be self-contained in a single file.",
+  "status": "in_progress",
+  "steps": [
+    "Step 1: Read and understand the current parse_log.py at /projects/sandbox/ARAT-RL/parse_log.py (161 lines). It has 3 functions (count_coverage, parse_log_file, count_unique_5xx_errors) and a __main__ block that processes 10 services.",
+    "Step 2: Refactor the data collection in __main__ to accumulate structured data dictionaries instead of just string concatenation into result[0]. Create data structures like: services_data = [{name, total, status_2xx, status_4xx, status_5xx, unique_5xx, branch_cov, line_cov, method_cov}, ...]. Keep all existing output (console prints, res.csv, errors.json) intact.",
+    "Step 3: Add a generate_html_report(services_data, errors) function that creates a beautiful, self-contained HTML file (report.html) with these sections:\n  - Executive Summary: total requests across all services, total errors, average coverage metrics in card/tile layout\n  - Status Code Distribution: a visual bar chart (pure CSS/HTML or inline SVG) for each service showing 2xx/4xx/5xx proportions with color coding (green/amber/red)\n  - Code Coverage Dashboard: horizontal bar charts for branch, line, and method coverage per service with percentage labels, color-coded by coverage level (red <50%, amber 50-80%, green >80%)\n  - Error Details: collapsible/expandable sections per service showing unique 5xx errors with syntax-highlighted stack traces (use <pre> with styled formatting)\n  - Use a modern, clean design: dark header, card-based layout, subtle shadows, responsive grid, professional color palette. Consider a design similar to testing/CI dashboards.\n  - All CSS must be inline in a <style> tag. Use CSS grid/flexbox for layout. No external CDN links.\n  - Optional: add a lightweight inline JS for interactivity (collapsible error sections, sort table columns, filter by service).",
+    "Step 4: In the __main__ block, after writing res.csv and errors.json, call generate_html_report() to produce report.html in the current directory.",
+    "Step 5: Verify the file has valid Python 3 syntax by running: python -c \"import ast; ast.parse(open('parse_log.py').read())\" (use python 2.7 ast module which can parse python 2 at minimum). Also verify the HTML generation works in isolation by adding a small test block or verifying the function can be called with sample data."
+  ],
+  "acceptance_criteria": [
+    "parse_log.py still produces res.csv and errors.json as before (backward compatible)",
+    "parse_log.py additionally generates a report.html file",
+    "The HTML report is a single self-contained file (no external CSS/JS dependencies)",
+    "The HTML report contains: summary cards, status code visualization, coverage bar charts, and error detail sections",
+    "The HTML uses modern styling (cards, color coding, responsive layout)",
+    "The code has valid Python syntax",
+    "The generate_html_report function can be tested independently with sample data"
+  ],
+  "verification": [
+    "Run: cd /projects/sandbox/ARAT-RL && python -c \"import ast; ast.parse(open('parse_log.py').read())\" to verify valid Python syntax",
+    "Run: cd /projects/sandbox/ARAT-RL && python -c \"exec(open('parse_log.py').read().split('if __name__')[0]); generate_html_report([{'name':'TestService','total':100,'status_2xx':70,'status_4xx':20,'status_5xx':10,'unique_5xx':3,'branch_cov':45.2,'line_cov':67.8,'method_cov':72.1}], {'TestService':['Error trace 1','Error trace 2']})\" to verify HTML generation works with sample data and produces report.html",
+    "Verify report.html exists and contains expected HTML structure: grep for key elements like '<html', 'Status Code', 'Coverage', 'Error'"
+  ],
+  "findings": ""
+}
