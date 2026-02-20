@@ -1,9 +1,14 @@
 import os
 import re
 import json
+import logging
 import subprocess
 from collections import Counter
 from json import JSONDecodeError
+
+from logger_config import setup_logging
+
+logger = logging.getLogger('parse-log')
 
 
 def count_coverage(path, port):
@@ -59,10 +64,10 @@ def parse_log_file(file_path):
                     log_data.append(current_log)
                     current_log = {}
     result[0] = result[0] + str(status2xx + status4xx + status5xx) + ',' + str(status2xx)+ ',' + str(status4xx) + ',' + str(status5xx) + ','
-    print("Total: " + str(status2xx + status4xx + status5xx))
-    print("Status 2xx: " + str(status2xx))
-    print("Status 4xx: " + str(status4xx))
-    print("Status 5xx: " + str(status5xx))
+    logger.info('Total: %d', status2xx + status4xx + status5xx)
+    logger.info('Status 2xx: %d', status2xx)
+    logger.info('Status 4xx: %d', status4xx)
+    logger.info('Status 5xx: %d', status5xx)
 
 
     return log_data
@@ -99,6 +104,7 @@ def count_unique_5xx_errors(log_data):
     return unique_stack_traces
 
 if __name__ == '__main__':
+    setup_logging('parse-log')
     logs = ["features.txt", "languagetool.txt", "ncs.txt", "restcountries.txt", "scs.txt", "genome.txt", "person.txt", "user.txt", "market.txt", "project.txt"]
     csvs = ["_11000_1.csv","_11010_1.csv","_11020_1.csv","_11030_1.csv","_11040_1.csv","_11050_1.csv","_11060_1.csv","_11070_1.csv","_11080_1.csv","_11090_1.csv"]
     result = [""]
@@ -116,7 +122,7 @@ if __name__ == '__main__':
     count_coverage("service/jdk11/market", "_11080_1")
     count_coverage("service/jdk11/project-tracking-system", "_11090_1")
     for log_file in logs:
-        print(log_file)
+        logger.info('Processing: %s', log_file)
         errors[log_file] = []
         log_data = parse_log_file(log_file)
         unique_stack_traces = count_unique_5xx_errors(log_data)
@@ -124,7 +130,7 @@ if __name__ == '__main__':
         for stack_trace, count in unique_stack_traces.items():
             errors[log_file].append(full_stack_traces[stack_trace])
             unique_5xx_count += 1
-        print(f'\nTotal unique number of 5xx errors: {unique_5xx_count}')
+        logger.info('Total unique number of 5xx errors: %d', unique_5xx_count)
         result[0] = result[0] + str(unique_5xx_count) + '\n'
 
 
@@ -146,7 +152,7 @@ if __name__ == '__main__':
                     total_line = total_line + int(items[8]) + int(items[7])
                     covered_method = covered_method + int(items[12])
                     total_method = total_method + int(items[12]) + int(items[11])
-        print(covered_branch/total_branch*100, covered_line/total_line*100, covered_method/total_method*100)
+        logger.info('Coverage - Branch: %.2f%%, Line: %.2f%%, Method: %.2f%%', covered_branch/total_branch*100, covered_line/total_line*100, covered_method/total_method*100)
         result[0] = result[0] + str(covered_method/total_method*100) + ',' + str(covered_branch/total_branch*100) + ',' + str(covered_line/total_line*100) + '\n'
 
     with open("res.csv", "w") as f:

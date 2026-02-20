@@ -1,6 +1,9 @@
 import re
 import uuid
+import logging
 from nltk.stem.snowball import SnowballStemmer
+
+logger = logging.getLogger('morest.model.parameter')
 
 
 class TargetStatus:
@@ -73,7 +76,7 @@ class Parameter:
                 self.schema = body
                 self.parse_schema(self.schema["properties"])
             else:
-                print("Body without name")
+                logger.debug('Body without name')
 
     def parse_schema(self, schema={}):
         if isinstance(schema, dict):

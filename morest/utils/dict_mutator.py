@@ -1,5 +1,8 @@
 import copy
+import logging
 import requests
+
+logger = logging.getLogger('morest.utils.dict_mutator')
 
 def dict_generator(indict, pre=None):
     pre = pre[:] if pre else []
@@ -75,7 +78,7 @@ def send_all_methods(http_methods,url,payload,key,value):
     for method in http_methods:
         response = requests.request(method,url,json=payload)
         #print(key,":",value,"     ",method,"    ",response.status_code,"    ",len(response.content))
-        print("{:20.15}:{:20.15}{:10.8}{:15}{:10}".format(key, value, method, str(response.status_code), str(len(response.content))))
+        logger.debug('%s: %s %s %s %s', key, value, method, str(response.status_code), str(len(response.content)))
 
 if __name__ == "__main__":
 
@@ -121,15 +124,15 @@ if __name__ == "__main__":
     combinedTamperedJsonList = tamperedValueJsonList + tamperedKeyJsonList
     combinedKeyList = tKeyList + keyList
     combinedValueList = valueList + tValueList
-    print("Request Prepared. Sending requests..")
-    print("--------------------------------------------------------------------------------------")
+    logger.info('Request Prepared. Sending requests..')
+    logger.info('--------------------------------------------------------------------------------------')
 
 
     #response = requests.request("CONNECT","http://127.0.0.1:3000/user",json=tamperedValueJsonList[0])
     #print(response)
-    print("{:20}{:20}{:10}{:15}{:10}".format("Key","Value", "Method", "Response Code", "Response Length"))
+    logger.info('Key                 Value               Method    Response Code  Response Length')
     #print("Modified Parameter    Method      Response Code    Response Length")
-    print("--------------------------------------------------------------------------------------")
+    logger.info('--------------------------------------------------------------------------------------')
 
     for i in range(0,len(combinedTamperedJsonList)):
         #May need to create custom request to modify headers to spoof as a real web request 

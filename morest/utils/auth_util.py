@@ -1,5 +1,8 @@
 import json
+import logging
 import requests
+
+logger = logging.getLogger('morest.utils.auth')
 
 
 class SUT:
@@ -14,7 +17,7 @@ def spree_login(ip_address):
         "password": "spree123"
     }
     spree_login = requests.post('%s/spree_oauth/token' % str(ip_address), json=spree_payload)
-    print(spree_login.text)
+    logger.debug('Login response: %s', spree_login.text)
     token = "Bearer " + json.loads(spree_login.text)['access_token']
     # token = "Bearer 894fa3111b5a8c4ff8778f2e20f067a367b665918a6eac28"
     return {'Bearer': token}

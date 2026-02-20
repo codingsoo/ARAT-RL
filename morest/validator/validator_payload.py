@@ -1,6 +1,9 @@
 import json
+import logging
 
 from flex.core import validate as flex_validate
+
+logger = logging.getLogger('morest.validator.payload')
 
 
 class ViolationType:
@@ -80,7 +83,7 @@ def find_method_by_response(apis, response):
         for method in api.methods:
             if method.method_name == api_name:
                 return method
-    print(api_name, "not found ")
+    logger.warning('%s not found', api_name)
     assert False
 
 def validate_mutations(method, baseline_response, response, mutation_index, current_index):

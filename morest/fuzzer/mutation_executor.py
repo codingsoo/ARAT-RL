@@ -16,6 +16,7 @@ import requests
 import re
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+logger = logging.getLogger('morest.fuzzer.mutation_executor')
 
 
 class NpEncoder(json.JSONEncoder):
@@ -134,7 +135,7 @@ class mutationSequenceConverter:
             for ind, key in enumerate(headers):
                 self.check_header_validity((key, headers[key]))
         except Exception as ex:
-            print(ex)
+            logger.warning('Header validation error: %s', ex)
             headers = {}
         # add pre defined headers
         for k in pre_defined_headers.keys():
@@ -144,7 +145,7 @@ class mutationSequenceConverter:
         try:
             raw_response = executed_method(url, params=params, data=form_data, json=data, headers=headers, files=files, allow_redirects=False, timeout=3)
         except requests.exceptions.ReadTimeout as err:
-            print(err)
+            logger.warning('Request timeout: %s', err)
             response["statusCode"] = 524
             response["content"] = "Timeout Error"
             response["resolved_value"] = "None"

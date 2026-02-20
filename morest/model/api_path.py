@@ -1,6 +1,9 @@
 from model.method import Method
 from model.constant import METHOD_CONST
 from model.rule.matcher import RuleMatcher
+import logging
+
+logger = logging.getLogger('morest.model.api_path')
 
 
 class API:
@@ -26,7 +29,7 @@ class API:
                 body[method]['parameters'].extend(body['parameters'])
             if len(body[method].keys()) == 0:
                 continue
-            print(method, self.path)
+            logger.debug('Method: %s, Path: %s', method, self.path)
             method = self.wrap_method(method, self.path, body[method])
             methods.append(method)
             self.method_map[method] = method
@@ -54,4 +57,4 @@ class API:
                 method.feed_from_method.add(post_method)
 
     def __str__(self):
-        print(self.path)
+        logger.debug('Path: %s', self.path)

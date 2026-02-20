@@ -1,4 +1,5 @@
 import datetime
+import logging
 import random
 import string
 from utils.basic_payloads import general_payload_list
@@ -7,6 +8,8 @@ import numpy as np
 import rstr
 
 from fuzzer.runtime_dictionary import RuntimeDictionary
+
+logger = logging.getLogger('morest.utils.payload_generator')
 
 
 class PayloadDataGenerator:
@@ -57,22 +60,18 @@ class PayloadDataGenerator:
             pass # do further processing
 
         elif param_type == 'array':
-            print("Current param type is array; array content: ")
-            print(example_value)
+            logger.debug('Current param type is array; array content: %s', example_value)
             raise Exception("Update code to handle the case.")
 
         elif param_type == 'schema':
-            print("Current param type is schema; schema content: ")
-            print(example_value)
+            logger.debug('Current param type is schema; schema content: %s', example_value)
             raise Exception("Update code to handle the case.")
 
         elif param_type == "properties":
-            print("Current param type is schema; properties content: ")
-            print(example_value)
+            logger.debug('Current param type is schema; properties content: %s', example_value)
             raise Exception("Update code to handle the case.")
         elif param_type == 'object':
-            print("Current param type is schema; object content: ")
-            print(example_value)
+            logger.debug('Current param type is schema; object content: %s', example_value)
             raise Exception("Update code to handle the case.")
 
         elif param_type == 'boolean':
@@ -323,7 +322,7 @@ class PayloadDataGenerator:
             ref, matched = self._build_ref(self.ref_dict[path])
             if matched:
                 return ref
-        print(object_body)
+        logger.debug('Object body: %s', object_body)
         if self.can_use_example(object_body):
             return object_body["example"]
         if self.should_use_dictionary_value(path):

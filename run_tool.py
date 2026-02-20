@@ -2,6 +2,11 @@ import os
 import sys
 import time
 import subprocess
+import logging
+
+from logger_config import setup_logging
+
+logger = logging.getLogger('run-tool')
 
 
 def whitebox(port):
@@ -46,6 +51,7 @@ def blackbox(swagger, port):
             subprocess.run(run + options, shell=True)
 
 if __name__ == "__main__":
+    setup_logging('run-tool')
     tool = sys.argv[1]
     service = sys.argv[2]
     port = sys.argv[3]
@@ -58,7 +64,7 @@ if __name__ == "__main__":
     else:
         subprocess.run("python3 run_service.py " + service + " " + str(port) + " blackbox", shell=True)
 
-    print("Service started in the background. To check or kill the session, please see README file.")
+    logger.info('Service started in the background. To check or kill the session, please see README file.')
     time.sleep(30)
 
     if service == "features-service":
@@ -133,8 +139,8 @@ if __name__ == "__main__":
         else:
             blackbox(os.path.join(curdir, "spec/project.yaml"), 30118)
 
-    print(
-        "Experiments are done. We are safely closing the service now. If you want to run more, please check if there is unclosed session. You can check it with 'tmux ls' command. To close the session, you can run 'tmux kill-sess -t {session name}'")
+    logger.info(
+        'Experiments are done. We are safely closing the service now. If you want to run more, please check if there is unclosed session. You can check it with \'tmux ls\' command. To close the session, you can run \'tmux kill-sess -t {session name}\'')
 
     time.sleep(180)
     subprocess.run("tmux kill-sess -t " + service, shell=True)

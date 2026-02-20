@@ -1,11 +1,15 @@
 import os
 import sys
+import logging
 
 from prance import ResolvingParser
 
 from build_graph import parse
 from fuzzer.fuzzer import APIFuzzer
 from utils.auth_util import get_token, SUT
+from logger_config import setup_logging
+
+logger = logging.getLogger('morest')
 
 
 def default_reclimit_handler(limit, parsed_url, recursions=()):
@@ -18,6 +22,7 @@ def default_reclimit_handler(limit, parsed_url, recursions=()):
 
 
 def main():
+    setup_logging('morest')
     # testing arguments format: swagger address, server address, system under test's name, *args to obtain token
     test_args = [sys.argv[1], sys.argv[2], SUT.BITBUCKET]
     parser = ResolvingParser(test_args[0],

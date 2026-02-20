@@ -8,39 +8,46 @@ This script verifies that all components of ARAT-RL are properly installed and c
 import subprocess
 import os
 import sys
+import logging
 from pathlib import Path
+
+from logger_config import setup_logging
+
+logger = logging.getLogger('verify-setup')
 
 def run_command(cmd, description):
     """Run a command and return success status."""
     try:
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if result.returncode == 0:
-            print(f"✓ {description}")
+            logger.info('%s', description)
             return True
         else:
-            print(f"✗ {description}: {result.stderr.strip()}")
+            logger.error('%s: %s', description, result.stderr.strip())
             return False
     except Exception as e:
-        print(f"✗ {description}: {str(e)}")
+        logger.error('%s: %s', description, str(e))
         return False
 
 def check_file_exists(filepath, description):
     """Check if a file exists."""
     if Path(filepath).exists():
-        print(f"✓ {description}")
+        logger.info('%s', description)
         return True
     else:
-        print(f"✗ {description}: File not found")
+        logger.error('%s: File not found', description)
         return False
 
 def main():
-    print("ARAT-RL Setup Verification")
-    print("=" * 40)
+    setup_logging('verify-setup')
+    logger.info('ARAT-RL Setup Verification')
+    logger.info('=' * 40)
     
     all_checks_passed = True
     
     # Check basic tools
-    print("\n1. Basic Tools:")
+    logger.info('')
+    logger.info('1. Basic Tools:')
     all_checks_passed &= run_command("java -version", "Java is installed")
     all_checks_passed &= run_command("mvn -version", "Maven is installed")
     all_checks_passed &= run_command("docker --version", "Docker is installed")
@@ -48,79 +55,88 @@ def main():
     all_checks_passed &= run_command("tmux -V", "tmux is installed")
     
     # Check Java versions
-    print("\n2. Java Versions:")
+    logger.info('')
+    logger.info('2. Java Versions:')
     java_output = subprocess.run("java -version", shell=True, capture_output=True, text=True)
     if "1.8" in java_output.stderr:
-        print("✓ Java 8 detected")
+        logger.info('Java 8 detected')
     elif "11" in java_output.stderr:
-        print("✓ Java 11 detected")
+        logger.info('Java 11 detected')
     else:
-        print("✗ Unexpected Java version")
+        logger.error('Unexpected Java version')
         all_checks_passed = False
     
     # Check environment files
-    print("\n3. Environment Files:")
+    logger.info('')
+    logger.info('3. Environment Files:')
     all_checks_passed &= check_file_exists("java8.env", "java8.env exists")
     all_checks_passed &= check_file_exists("java11.env", "java11.env exists")
     
     # Check build artifacts
-    print("\n4. Build Artifacts:")
+    logger.info('')
+    logger.info('4. Build Artifacts:')
     cp_files = list(Path("service").rglob("cp.txt"))
     if len(cp_files) == 6:
-        print(f"✓ All {len(cp_files)} cp.txt files found")
+        logger.info('All %d cp.txt files found', len(cp_files))
     else:
-        print(f"✗ Expected 6 cp.txt files, found {len(cp_files)}")
+        logger.error('Expected 6 cp.txt files, found %d', len(cp_files))
         all_checks_passed = False
     
     # Check JAR files
-    print("\n5. JAR Files:")
+    logger.info('')
+    logger.info('5. JAR Files:')
     all_checks_passed &= check_file_exists("evomaster.jar", "EvoMaster JAR")
     all_checks_passed &= check_file_exists("org.jacoco.agent-0.8.7-runtime.jar", "JaCoCo Agent JAR")
     all_checks_passed &= check_file_exists("org.jacoco.cli-0.8.7-nodeps.jar", "JaCoCo CLI JAR")
     
     # Check Python dependencies
-    print("\n6. Python Dependencies:")
+    logger.info('')
+    logger.info('6. Python Dependencies:')
     try:
         import yaml
         import requests
-        print("✓ Required Python packages installed")
+        logger.info('Required Python packages installed')
     except ImportError as e:
-        print(f"✗ Missing Python package: {e}")
+        logger.error('Missing Python package: %s', e)
         all_checks_passed = False
     
     # Check Docker images
-    print("\n7. Docker Images:")
+    logger.info('')
+    logger.info('7. Docker Images:')
     docker_images = subprocess.run("docker images", shell=True, capture_output=True, text=True)
     if "genomenexus/gn-mongo" in docker_images.stdout:
-        print("✓ Genome Nexus MongoDB image")
+        logger.info('Genome Nexus MongoDB image')
     else:
-        print("✗ Genome Nexus MongoDB image not found")
+        logger.error('Genome Nexus MongoDB image not found')
         all_checks_passed = False
     
     if "mongo" in docker_images.stdout:
-        print("✓ MongoDB image")
+        logger.info('MongoDB image')
     else:
-        print("✗ MongoDB image not found")
+        logger.error('MongoDB image not found')
         all_checks_passed = False
     
     if "mysql" in docker_images.stdout:
-        print("✓ MySQL image")
+        logger.info('MySQL image')
     else:
-        print("✗ MySQL image not found")
+        logger.error('MySQL image not found')
         all_checks_passed = False
     
     # Summary
-    print("\n" + "=" * 40)
+    logger.info('')
+    logger.info('=' * 40)
     if all_checks_passed:
-        print("✓ All checks passed! ARAT-RL setup appears to be correct.")
-        print("\nYou can now run:")
-        print("  python3 arat-rl.py spec/features.yaml http://localhost:30100/ 60")
+        logger.info('All checks passed! ARAT-RL setup appears to be correct.')
+        logger.info('')
+        logger.info('You can now run:')
+        logger.info('  python3 arat-rl.py spec/features.yaml http://localhost:30100/ 60')
     else:
-        print("✗ Some checks failed. Please review the issues above.")
-        print("\nCommon solutions:")
-        print("  - Run setup script: sh setup_macos.sh (macOS) or sh setup.sh (Ubuntu)")
-        print("  - Check troubleshooting guide: TROUBLESHOOTING.md")
-        print("  - Verify all dependencies are installed")
+        logger.error('Some checks failed. Please review the issues above.')
+        logger.info('')
+        logger.info('Common solutions:')
+        logger.info('  - Run setup script: sh setup_macos.sh (macOS) or sh setup.sh (Ubuntu)')
+        logger.info('  - Check troubleshooting guide: TROUBLESHOOTING.md')
+        logger.info('  - Verify all dependencies are installed')
         sys.exit(1)
 
 if __name__ == "__main__":

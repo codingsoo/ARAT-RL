@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 import uuid
 from datetime import datetime
@@ -10,6 +11,8 @@ from model.operation_dependency_graph import OperationDependencyGraph
 from validator.validator_huawei import validate
 from .huawei_converter import HuaWeiConverter
 from .runtime_dictionary import RuntimeDictionary
+
+logger = logging.getLogger('morest.fuzzer.huawei')
 
 
 class APIFuzzer:
@@ -101,9 +104,9 @@ class APIFuzzer:
             # analyze dependency to add
             self.analyze_dependency_to_add()
             break
-            print('current seq')
+            logger.debug('Current sequences:')
             for seq in self.sequences:
-                print(seq.to_str())
+                logger.debug('%s', seq.to_str())
             # print('\n runtime dictionary')
             # for signature in self.runtime_dict.signature_to_value.keys():
             #     print(signature)
@@ -187,9 +190,8 @@ class APIFuzzer:
                     for req, res in request_parameters:
                         new_seq.add_ref(len(new_seq) - 1, req, res)
                     res.add(new_seq)
-                    print('add ref in sequence', sequence.requests[0].method_name, "to", method,
-                          f'via {request_parameters}', "new sequence",
-                          len(new_seq))
+                    logger.debug('add ref in sequence %s to %s via %s, new sequence %d', sequence.requests[0].method_name, method,
+                          request_parameters, len(new_seq))
 
         #     print('request_parameter_to_methods')
         #     print(request_parameter_to_methods)
@@ -204,7 +206,7 @@ class APIFuzzer:
             resp = ResponseReader.message_queue.pop()
             response_sequence_id = resp["sequenceID"]
             if not self.pending_request.__contains__(response_sequence_id):
-                print('mix request', response_sequence_id)
+                logger.warning('mix request %s', response_sequence_id)
                 continue
             violations = validate(resp, self.apis)
             has_error = False
@@ -242,7 +244,7 @@ class APIFuzzer:
                         })
                     self.success_apis.add(response["apiName"])
                 if status_code == 0:
-                    print(resp)
+                    logger.warning('Zero status response: %s', resp)
                     time.sleep(10)
                 if status_code > 499 and status_code < 600:
                     self.error_apis.add(response['apiName'])
@@ -317,26 +319,37 @@ class APIFuzzer:
         for status_code in self.status_code_status.keys():
             status_stat += f'{status_code}:{self.status_code_status[status_code]},' \
                            f'{float(self.status_code_status[status_code]) / self.response_count} '
-        print(
-            f'{datetime.now().strftime("%Y/%m/%d %H:%M:%S")}, Fuzzing Time: {elapsed}s, Send Msg Count: {self.send_msg_count}, '
-            f'Receive Msg Count: {self.receive_msg_count}, Success Response Sequence Count: {self.success_sequence_count}, '
-            f'Success Sequence Rate: {float(self.success_sequence_count) / self.receive_msg_count}, '
-            f'Success API: {float(len(self.success_apis)) / len(self.total_apis)}'
-            f' ({len(self.success_apis)}/{len(self.total_apis)}),'
-            f'Error API: {float(len(self.error_apis)) / len(self.total_apis)}'
-            f' ({len(self.error_apis)}/{len(self.total_apis)}),'
-            f' Tested Error and Success Unique API: {float(len(set.union(self.success_apis, self.error_apis))) / len(self.total_apis)}'
-            f' ({len(set.union(self.success_apis, self.error_apis))}/{len(self.total_apis)}),'
-            f' Request Count: {self.request_count}, '
-            f'Response Count: {self.response_count}, Response / Request: {float(self.response_count) / self.request_count}, '
-            f'Request(QPS): {float(self.request_count) / elapsed}, Response(QPS):'
-            f' {float(self.response_count) / elapsed}, Violation Count: {len(self.violations)}'
-            f' Remain Sequence Count: {len(self.sequences)}'
-            f' Success Sequence: {len(self.success_sequence)}')
-        print('success')
-        print(self.success_apis)
-        print('errors')
-        print(self.error_apis)
-        print(self.api_curve)
-        print(self.runtime_dict.signature_to_value.keys())
-        print(status_stat)
+        logger.info(
+            '%s, Fuzzing Time: %ss, Send Msg Count: %s, '
+            'Receive Msg Count: %s, Success Response Sequence Count: %s, '
+            'Success Sequence Rate: %s, '
+            'Success API: %s (%s/%s),'
+            'Error API: %s (%s/%s),'
+            ' Tested Error and Success Unique API: %s (%s/%s),'
+            ' Request Count: %s, '
+            'Response Count: %s, Response / Request: %s, '
+            'Request(QPS): %s, Response(QPS): %s, Violation Count: %s'
+            ' Remain Sequence Count: %s'
+            ' Success Sequence: %s',
+            datetime.now().strftime("%Y/%m/%d %H:%M:%S"), elapsed, self.send_msg_count,
+            self.receive_msg_count, self.success_sequence_count,
+            float(self.success_sequence_count) / self.receive_msg_count,
+            float(len(self.success_apis)) / len(self.total_apis),
+            len(self.success_apis), len(self.total_apis),
+            float(len(self.error_apis)) / len(self.total_apis),
+            len(self.error_apis), len(self.total_apis),
+            float(len(set.union(self.success_apis, self.error_apis))) / len(self.total_apis),
+            len(set.union(self.success_apis, self.error_apis)), len(self.total_apis),
+            self.request_count,
+            self.response_count, float(self.response_count) / self.request_count,
+            float(self.request_count) / elapsed,
+            float(self.response_count) / elapsed, len(self.violations),
+            len(self.sequences),
+            len(self.success_sequence))
+        logger.debug('success')
+        logger.debug('%s', self.success_apis)
+        logger.debug('errors')
+        logger.debug('%s', self.error_apis)
+        logger.debug('%s', self.api_curve)
+        logger.debug('%s', self.runtime_dict.signature_to_value.keys())
+        logger.debug('%s', status_stat)
