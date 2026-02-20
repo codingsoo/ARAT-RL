@@ -9,12 +9,16 @@ import rstr
 import base64
 import random
 import string
+import logging
 import prance
 import difflib
 import requests
 import datetime
 import functools
 from collections import defaultdict
+from logger_config import setup_logging
+
+logger = logging.getLogger('arat-rl')
 
 
 
@@ -232,7 +236,7 @@ def execute_operations(base_url, selected_operation, selected_parameters):
                 elif method == 'head':
                     return requests.head(url, headers=headers, params=query_params)
         except requests.exceptions.RequestException as e:
-            print(f"Request error: {e}")
+            logger.warning('Request error: %s', e)
             return None
 
     for param_value_dict in selected_parameters:
@@ -402,7 +406,7 @@ def report_http_500_errors():
     with open(filename, 'w') as file:
         file.write(report_content)
 
-    print(f"Report saved to {filename}")
+    logger.info('Report saved to %s', filename)
 
 
 def update_q_table(q_table, alpha, gamma, selected_operation, selected_parameters, response, path, query_params, body_params):
@@ -423,6 +427,7 @@ def update_q_table(q_table, alpha, gamma, selected_operation, selected_parameter
         reward = -5
 
     if response.status_code == 500:
+        logger.info('HTTP 500 error detected for operation: %s', operation_id)
         if operation_id not in http_500_operations:
             http_500_operations.append(operation_id)
             total_n[0] = total_n[0] + 1
@@ -685,6 +690,10 @@ def main():
     operations, parameters_frequency = analyze_information(openapi_spec)
     alpha, gamma, q_table = initialize_q_learning(operations, parameters_frequency)
 
+    logger.info('Starting ARAT-RL with spec: %s, base URL: %s, time limit: %s',
+                openapi_spec_file, base_url, sys.argv[3])
+    logger.info('Found %d operations', len(operations))
+
     start_time = time.time()
     time_limit = int(sys.argv[3])
     iteration = 0
@@ -694,6 +703,8 @@ def main():
         elapsed_time = time.time() - start_time
         if elapsed_time >= time_limit:
             break
+        if iteration % 100 == 0:
+            logger.info('Iteration %d, elapsed time: %.1fs', iteration, elapsed_time)
         parameter_values = generate_parameter_values(operations)
         selected_operation, selected_parameters = select_operations_and_parameters(operations, parameter_values,
                                                                                    q_table)
@@ -732,6 +743,7 @@ def main():
         iteration += 1
 
 if __name__ == "__main__":
+    setup_logging('arat-rl', log_file='arat-rl.log')
     base_url = sys.argv[2]
     EPSILON = [0.1]
     ss = [None]
@@ -749,4 +761,5 @@ if __name__ == "__main__":
     q_value = {}
     MUTATION_RATE = 0.1
     main()
+    logger.info('Testing completed, generating report')
     report_http_500_errors()
