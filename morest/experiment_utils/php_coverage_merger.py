@@ -1,7 +1,10 @@
 import argparse
+import logging
 import os
 import json
 import time
+
+logger = logging.getLogger('morest.experiment.coverage')
 
 
 def get_coverage_logs(path):
@@ -20,7 +23,7 @@ def read_data(path=""):
 def run_single(folder, result={}):
     logs = (get_coverage_logs(folder))
     for log in logs:
-        print("read", log)
+        logger.info('Read: %s', log)
         data = read_data(log)
         for file_name in data:
             if not (file_name in result):
@@ -36,7 +39,7 @@ def run_single(folder, result={}):
             continue
         line_count += len(result[file_name])
     result["line_count"] = line_count
-    print("total line count", line_count)
+    logger.info('Total line count: %d', line_count)
 
 
 def main(args):
@@ -44,8 +47,8 @@ def main(args):
     output_file = args.o
     result = {}
     while True:
-        print("read from", coverage_folder)
-        print("write to", output_file)
+        logger.info('Read from: %s', coverage_folder)
+        logger.info('Write to: %s', output_file)
         run_single(coverage_folder, result)
         with open(output_file, 'w') as data:
             json.dump(result, data)

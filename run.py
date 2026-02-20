@@ -1,9 +1,15 @@
 import sys
 import time
 import subprocess
+import logging
+
+from logger_config import setup_logging
+
+logger = logging.getLogger('run')
 
 
 if __name__ == "__main__":
+    setup_logging('run')
     tool = sys.argv[1]
     time_limit = "1"
 
@@ -12,7 +18,7 @@ if __name__ == "__main__":
 
     for i in range(10):
         cov_port = base_cov_port + i*10
-        print("Running " + tool + " for " + services[i] + ": " + str(cov_port))
+        logger.info('Running %s for %s: %s', tool, services[i], cov_port)
         session = tool + '_' + services[i]
         cov_session = services[i] + "_cov"
         subprocess.run("tmux new -d -s " + cov_session + " sh get_cov.sh " + str(cov_port), shell=True)
@@ -21,7 +27,7 @@ if __name__ == "__main__":
     time.sleep(300)
     time.sleep(int(time_limit) * 60 * 60)
 
-    print("Stop running services...")
+    logger.info('Stop running services...')
     subprocess.run("sudo docker stop `sudo docker ps -a -q`", shell=True)
     time.sleep(30)
     subprocess.run("sudo docker rm `sudo docker ps -a -q`", shell=True)

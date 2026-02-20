@@ -1,6 +1,7 @@
 import collections
 import difflib
 import json
+import logging
 import re
 
 import numpy as np
@@ -8,6 +9,8 @@ from model.method import Method
 from fuzzer.schema_validator import validate
 from .util import resolve_json_value
 from fuzzer.relation_reasoner import RelationReasoner
+
+logger = logging.getLogger('morest.fuzzer.runtime_dictionary')
 
 
 class ParameterType:
@@ -223,7 +226,7 @@ class RuntimeDictionary:
                     self.signature_to_value[signature] = signature_to_value
                     self.update_signature_to_path_threshold(signature)
                     has_new_attribute = True
-                    print(signature, value)
+                    logger.debug('Runtime dict: %s = %s', signature, value)
                 # record value type
                 # value_type_set = self.path_to_type.get(signature, set())
                 # value_type_set.add(value_type)
@@ -247,7 +250,6 @@ class RuntimeDictionary:
                     signature_to_value.append(value)
             return has_new_attribute
         except Exception as e:
-            print("exception", content)
-            print(e)
+            logger.warning('Exception parsing content: %s - %s', content, e)
             # raise e
             return has_new_attribute

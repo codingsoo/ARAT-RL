@@ -1,4 +1,7 @@
 from model.util.path_resource_util import WordUtil
+import logging
+
+logger = logging.getLogger('morest.model.rule.resource_path')
 
 
 class ResourcePathRule:
@@ -18,6 +21,6 @@ class ResourcePathRule:
             return False
         if from_method_resource_path in [to_method_resource_path[i:len(from_method_resource_path) + i] for i in
                                          range(len(to_method_resource_path))]:
-            print('resource path infer', from_method, '->', to_method)
+            logger.debug('resource path infer %s -> %s', from_method, to_method)
             return True
         return False

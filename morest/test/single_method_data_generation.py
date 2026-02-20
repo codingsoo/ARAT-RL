@@ -1,10 +1,13 @@
 import os
+import logging
 
 from prance import ResolvingParser
 
 from build_graph import parse
 from fuzzer.fuzzer import APIFuzzer
 from fuzzer.normal_test_data_generator import RandomDataGenerator
+
+logger = logging.getLogger('morest.test')
 
 
 def default_reclimit_handler(limit, parsed_url, recursions=()):
@@ -25,12 +28,12 @@ def main():
             parameter = method.request_parameters[parameter_name]
             random_data_generator = RandomDataGenerator(parameter)
             result = random_data_generator.generate()
-            print(result)
+            logger.debug('Result: %s', result)
             if method.request_body is not None:
                 generator = RandomDataGenerator(method.request_body)
                 generated_value = generator.generate()
                 data = generated_value
-                print(data)
+                logger.debug('Data: %s', data)
 
 
 if __name__ == '__main__':

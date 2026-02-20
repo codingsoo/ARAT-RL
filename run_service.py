@@ -2,6 +2,9 @@ import subprocess
 import time
 import sys
 import os
+import logging
+
+logger = logging.getLogger('run-service')
 
 def run_service(service_path, class_name):
     with open(service_path + "/cp.txt", 'r') as f:

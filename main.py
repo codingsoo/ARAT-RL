@@ -9,12 +9,16 @@ import rstr
 import base64
 import random
 import string
+import logging
 import prance
 import difflib
 import requests
 import datetime
 import functools
 from collections import defaultdict
+from logger_config import setup_logging
+
+logger = logging.getLogger('arat-rl-main')
 
 
 
@@ -232,7 +236,7 @@ def execute_operations(base_url, selected_operation, selected_parameters):
                 elif method == 'head':
                     return requests.head(url, headers=headers, params=query_params)
         except requests.exceptions.RequestException as e:
-            print(f"Request error: {e}")
+            logger.warning('Request error: %s', e)
             return None
 
     for param_value_dict in selected_parameters:
@@ -642,6 +646,9 @@ def main():
     operations, parameters_frequency = analyze_information(openapi_spec)
     alpha, gamma, q_table = initialize_q_learning(operations, parameters_frequency)
 
+    logger.info('Starting arat-rl-main with spec: %s, base URL: %s', openapi_spec_file, base_url)
+    logger.info('Found %d operations', len(operations))
+
     start_time = time.time()
     time_limit = 3600
     iteration = 0
@@ -651,6 +658,8 @@ def main():
         elapsed_time = time.time() - start_time
         if elapsed_time >= time_limit:
             break
+        if iteration % 100 == 0:
+            logger.info('Iteration %d, elapsed time: %.1fs', iteration, elapsed_time)
         parameter_values = generate_parameter_values(operations)
         selected_operation, selected_parameters = select_operations_and_parameters(operations, parameter_values,
                                                                                    q_table)
@@ -689,6 +698,7 @@ def main():
         iteration += 1
 
 if __name__ == "__main__":
+    setup_logging('arat-rl-main', log_file='arat-rl-main.log')
     base_url = sys.argv[2]
     EPSILON = [0.1]
     ss = [None]

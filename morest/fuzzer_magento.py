@@ -1,4 +1,5 @@
 import os
+import logging
 
 from prance import ResolvingParser
 
@@ -6,6 +7,8 @@ from build_graph import parse
 from fuzzer.fuzzer import APIFuzzer
 import requests
 import json
+
+logger = logging.getLogger('morest.fuzzer.magento')
 
 
 def default_reclimit_handler(limit, parsed_url, recursions=()):
@@ -23,7 +26,7 @@ def spree_login(ip_address):
         "password": "spree123"
     }
     spree_login = requests.post('%s/spree_oauth/token'%str(ip_address), json = spree_payload)
-    print(spree_login.text)
+    logger.debug('Login response: %s', spree_login.text)
     token = "Bearer " + json.loads(spree_login.text)['access_token']
     # token = "Bearer 894fa3111b5a8c4ff8778f2e20f067a367b665918a6eac28"
     return token

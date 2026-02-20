@@ -1,10 +1,13 @@
 import json
+import logging
 import re
 import numpy as np
 from graphviz import Digraph
 
 from .sequence import Sequence
 from .sequence import SequenceOrigin
+
+logger = logging.getLogger('morest.model.odg')
 
 
 class Path:
@@ -118,7 +121,7 @@ class OperationDependencyGraph:
         dependency = self.load_traffic_dependency(path)
         yaml_method_map = self.get_yaml_method_path_map()
         results = self.get_traffic_yaml_mapped_methods_map(dependency, yaml_method_map)
-        print(len(results), results)
+        logger.debug('Results: %d - %s', len(results), results)
 
     def get_yaml_method_path_map(self):
         path_pattern = re.compile('\{(.*?)\}')
@@ -184,7 +187,7 @@ class OperationDependencyGraph:
         for method in methods:
             method_signatures.append(f'{method.method_type} {method.method_path}')
         res = ' -> '.join(method_signatures)
-        print(res)
+        logger.debug('Result: %s', res)
         return res
 
     def extend_sequence(self, path):
@@ -254,7 +257,7 @@ class OperationDependencyGraph:
                 continue
             if method in covered_apis and method.crud > crud_sort_map['post']:
                 continue
-            print('traversing path', method)
+            logger.debug('Traversing path: %s', method)
             paths, covered = self.generate_graph_sequence(method)
             covered_apis = covered_apis.union(covered)
             raw_sequences.extend(paths)
@@ -263,10 +266,10 @@ class OperationDependencyGraph:
             sequence = self.extend_sequence(seq)
             sequence.origin = SequenceOrigin.ODG
             wrapped_sequences.append(sequence)
-        print('hashing')
+        logger.debug('Hashing')
         result = set(wrapped_sequences)
-        print("Generate sequences # : ", len(raw_sequences), ' extending sequences # : ', len(wrapped_sequences),
-              ' result ', len(result))
+        logger.info('Generate sequences: %d, extending sequences: %d, total: %d', len(raw_sequences), len(wrapped_sequences),
+              len(result))
         return result
 
     def get_single_node_sequence(self):

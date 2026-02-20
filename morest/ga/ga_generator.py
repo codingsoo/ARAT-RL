@@ -1,4 +1,5 @@
 import time
+import logging
 from fuzzer.runtime_dictionary import RuntimeDictionary
 from model.operation_dependency_graph import OperationDependencyGraph
 import uuid
@@ -11,6 +12,8 @@ from .Mutator._change_mutator import ChangeMutator
 import copy
 import itertools
 import numpy as np
+
+logger = logging.getLogger('morest.ga.generator')
 
 
 class GAGenerator:
@@ -104,8 +107,8 @@ class GAGenerator:
             for chromosome in self._chromosomes:
                 self.result.append(copy.deepcopy(chromosome))
             if self.verbose:
-                print(
-                    f'time: {time.time()}, round:{counter}, best result:{sorted(self._chromosomes, key=lambda x: x.fitness)[0].fitness}')
+                logger.debug(
+                    'time: %s, round:%s, best result:%s', time.time(), counter, sorted(self._chromosomes, key=lambda x: x.fitness)[0].fitness)
             counter += 1
         return self.result
 

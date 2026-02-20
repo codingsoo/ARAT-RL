@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 import uuid
 from datetime import datetime
@@ -14,6 +15,8 @@ from .normal_executor import SequenceConverter
 from .mutation_executor import mutationSequenceConverter
 from .runtime_dictionary import RuntimeDictionary
 from model.sequence import SequenceOrigin
+
+logger = logging.getLogger('morest.fuzzer')
 
 
 class APIFuzzer:
@@ -110,9 +113,9 @@ class APIFuzzer:
 
             # analyze dependency to add
             self.analyze_dependency_to_add()
-            print('current seq')
+            logger.debug('Current sequences:')
             for seq in self.sequences:
-                print(seq.to_str())
+                logger.debug('%s', seq.to_str())
             # Phase 2
             # if previous_success_size != len(self.success_sequence) and np.random.random() > 0.95:
             #     previous_success_size = len(self.success_sequence)
@@ -125,7 +128,7 @@ class APIFuzzer:
         # executor.draw_response_dict()
 
     def mutation_fuzz_run(self):
-        print("Continue to mutation fuzzing \n-------------------- \n")
+        logger.info('Continue to mutation fuzzing')
         time.sleep(3)
         # re_initialize the fuzzer
         self.runtime_dict = RuntimeDictionary()
@@ -159,10 +162,10 @@ class APIFuzzer:
                     self.send_msg_count += 1
                     self.process_mutation_response(baseline_res, res, sequence, mutation_index)
         self.write_mutation_result()
-        print(self.violations)
+        logger.info('Violations: %s', self.violations)
 
     def synthesis_resource_sequence(self, executor):
-        print('synthesis resource')
+        logger.debug('Synthesis resource')
         add_sequence_size = 100
         matched_pair = {}
         success_sequence = list(self.success_sequence)
@@ -346,9 +349,8 @@ class APIFuzzer:
                     if not is_valid:
                         break
                     generated_sequences.add(new_seq)
-                    print('add ref in sequence', sequence.requests[0].method_name, "to", method,
-                          f'via {request_parameters}', "new sequence",
-                          len(new_seq))
+                    logger.debug('add ref in sequence %s to %s via %s, new sequence %d', sequence.requests[0].method_name, method,
+                          request_parameters, len(new_seq))
                     break
 
         #     print('request_parameter_to_methods')
@@ -398,7 +400,7 @@ class APIFuzzer:
                         "time": time.time() - self.begin,
                         'count': len(self.success_endpoint) + 1
                     })
-                print(method_path, 'method path')
+                logger.debug('Method path: %s', method_path)
                 self.success_endpoint.add(method_path)
                 self.success_apis.add(response["apiName"])
             if status_code > 499 and status_code < 600:
@@ -560,38 +562,51 @@ class APIFuzzer:
         sequence_source = {}
         for seq in self.success_sequence:
             sequence_source[seq.origin] = sequence_source.get(seq.origin, 0) + 1
-        print(
-            f'{datetime.now().strftime("%Y/%m/%d %H:%M:%S")}, Fuzzing Time: {elapsed}s, Send Msg Count: {self.send_msg_count}, '
-            f'Receive Msg Count: {self.receive_msg_count}, Success Response Sequence Count: {self.success_sequence_count}, '
-            f'Success Sequence Rate: {float(self.success_sequence_count) / self.receive_msg_count}, '
-            f'Success API: {float(len(self.success_apis)) / len(self.total_apis)}'
-            f' ({len(self.success_apis)}/{len(self.total_apis)}),'
-            f'Error API: {float(len(self.error_apis)) / len(self.total_apis)}'
-            f' ({len(self.error_apis)}/{len(self.total_apis)}),'
-            f'Success Endpoint: {float(len(self.success_endpoint)) / len(self.apis)}'
-            f' ({len(self.success_endpoint)}/{len(self.apis)}),'
-            f'Error Endpoint: {float(len(self.error_endpoint)) / len(self.apis)}'
-            f' ({len(self.error_endpoint)}/{len(self.apis)}),'
-            f' Tested Error and Success Unique API: {float(len(set.union(self.success_apis, self.error_apis))) / len(self.total_apis)}'
-            f' ({len(set.union(self.success_apis, self.error_apis))}/{len(self.total_apis)}),'
-            f' Request Count: {self.request_count}, '
-            f'Response Count: {self.response_count}, Response / Request: {float(self.response_count) / self.request_count}, '
-            f'Request(QPS): {float(self.request_count) / elapsed}, Response(QPS):'
-            f' {float(self.response_count) / elapsed}, Violation Count: {len(self.violations)}'
-            f' Remain Sequence Count: {len(self.sequences)}'
-            f' Success Sequence: {len(self.success_sequence)}')
-        print('success')
-        print(self.success_apis)
-        print('errors')
-        print(self.error_apis)
-        print('==API Curve')
-        print({
+        logger.info(
+            '%s, Fuzzing Time: %ss, Send Msg Count: %s, '
+            'Receive Msg Count: %s, Success Response Sequence Count: %s, '
+            'Success Sequence Rate: %s, '
+            'Success API: %s (%s/%s),'
+            'Error API: %s (%s/%s),'
+            'Success Endpoint: %s (%s/%s),'
+            'Error Endpoint: %s (%s/%s),'
+            ' Tested Error and Success Unique API: %s (%s/%s),'
+            ' Request Count: %s, '
+            'Response Count: %s, Response / Request: %s, '
+            'Request(QPS): %s, Response(QPS): %s, Violation Count: %s'
+            ' Remain Sequence Count: %s'
+            ' Success Sequence: %s',
+            datetime.now().strftime("%Y/%m/%d %H:%M:%S"), elapsed, self.send_msg_count,
+            self.receive_msg_count, self.success_sequence_count,
+            float(self.success_sequence_count) / self.receive_msg_count,
+            float(len(self.success_apis)) / len(self.total_apis),
+            len(self.success_apis), len(self.total_apis),
+            float(len(self.error_apis)) / len(self.total_apis),
+            len(self.error_apis), len(self.total_apis),
+            float(len(self.success_endpoint)) / len(self.apis),
+            len(self.success_endpoint), len(self.apis),
+            float(len(self.error_endpoint)) / len(self.apis),
+            len(self.error_endpoint), len(self.apis),
+            float(len(set.union(self.success_apis, self.error_apis))) / len(self.total_apis),
+            len(set.union(self.success_apis, self.error_apis)), len(self.total_apis),
+            self.request_count,
+            self.response_count, float(self.response_count) / self.request_count,
+            float(self.request_count) / elapsed,
+            float(self.response_count) / elapsed, len(self.violations),
+            len(self.sequences),
+            len(self.success_sequence))
+        logger.debug('success')
+        logger.debug('%s', self.success_apis)
+        logger.debug('errors')
+        logger.debug('%s', self.error_apis)
+        logger.debug('==API Curve')
+        logger.debug('%s', {
             "success_api": self.api_curve,
             "error_api": self.error_api_curve,
             "success_endpoint": self.success_endpoint_api_curve,
             "error_endpoint": self.error_endpoint_api_curve,
         })
-        print(self.runtime_dict.signature_to_value.keys())
-        print(status_stat)
+        logger.debug('%s', self.runtime_dict.signature_to_value.keys())
+        logger.debug('%s', status_stat)
         # print(sequence_source)
-        print("sequence source", sequence_source)
+        logger.debug('sequence source %s', sequence_source)

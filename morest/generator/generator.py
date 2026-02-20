@@ -1,8 +1,11 @@
 import copy
+import logging
 from model.method import Method
 import json
 import random
 import string
+
+logger = logging.getLogger('morest.generator')
 
 
 def randomString(stringLength=8):
@@ -69,7 +72,7 @@ def generate_testcases(testcases=[]):
 
     with open("testcase.json", 'w') as data:
         json.dump(res, data)
-    print(type)
+    logger.debug('Generated types: %s', type)
 
 
 def traverser(apis=[]):

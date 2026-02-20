@@ -1,7 +1,10 @@
 import uuid
 import re
+import logging
 from model.constant import METHOD_CONST
 from model.parameter import Parameter
+
+logger = logging.getLogger('morest.model.method')
 
 crud_sort_map = {
     "head": 1,
@@ -48,7 +51,7 @@ class Method:
         responses = body["responses"]
         for respon in responses:
             format_response = self.parse_response(respon, responses[respon])
-        print("Response", self.response_parameter_name)
+        logger.debug('Response: %s', self.response_parameter_name)
 
     def parse_param(self, parameters=[]):
         res = {}
@@ -60,7 +63,7 @@ class Method:
                 body_tuple_list = self.request_parameter_body_tuple.get(k, [])
                 body_tuple_list.extend(res[name].parameter_body_tuple[k])
                 self.request_parameter_body_tuple[k] = body_tuple_list
-        print("Request", self.request_parameter_name)
+        logger.debug('Request: %s', self.request_parameter_name)
         return res
 
     def parse_response(self, status_code, response={}):
@@ -93,7 +96,7 @@ class Method:
     def _get_nominal_parameters(self, parameters, with_parameter_name=True):
         res = set()
         if len(parameters) == 0:
-            print(self.method_signature, 'has no parameter [in get nominal parameters]')
+            logger.debug('%s has no parameter [in get nominal parameters]', self.method_signature)
         for parameter in parameters:
             for nominal_values in parameter.attribute_path_dict.values():
                 for value in nominal_values:

@@ -1,5 +1,8 @@
 from model.rule.blacklist import BLACK_LIST
 from model.util.type_reasoner import reason_type
+import logging
+
+logger = logging.getLogger('morest.model.rule.concrete')
 
 
 class ConcreteRule:
